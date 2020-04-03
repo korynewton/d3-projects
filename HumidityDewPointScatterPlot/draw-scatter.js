@@ -5,6 +5,7 @@ async function drawScatter() {
   // data accessors
   const xAccessor = (d) => d.dewPoint;
   const yAccessor = (d) => d.humidity;
+  const colorAccessor = (d) => d.cloudCover;
 
   // determine if screen height or width is smaller, use that as the chart width
   const width = d3.min([window.innerWidth * 0.9, window.innerHeight * 0.9]);
@@ -55,6 +56,12 @@ async function drawScatter() {
     .range([dimensions.boundedHeight, 0])
     .nice();
 
+  // color scale
+  const colorScale = d3
+    .scaleLinear()
+    .domain(d3.extent(dataset, colorAccessor))
+    .range(['skyblue', 'darkslategrey']);
+
   //   // draw data points
   //   let dots = bounds
   //     .selectAll('circle')
@@ -75,7 +82,7 @@ async function drawScatter() {
     .attr('cx', (d) => xScale(xAccessor(d)))
     .attr('cy', (d) => yScale(yAccessor(d)))
     .attr('r', 5)
-    .attr('fill', 'cornflowerblue');
+    .attr('fill', (d) => colorScale(colorAccessor(d)));
 
   // generate x axis with scale
   const xAxisGenerator = d3.axisBottom().scale(xScale);
