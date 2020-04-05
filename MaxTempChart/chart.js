@@ -1,11 +1,11 @@
 async function drawLineChart() {
   // import weather data
-  const dataset = await d3.json('./../../seattle_weather_data.json');
-  // const dataset = await d3.json('./../../kazakhstan_weather_data.json');
+  const dataset = await d3.json('./seattle_weather_data.json');
+  // const dataset = await d3.json('./kazakhstan_weather_data.json');
 
-  const yAccessor = d => d.temperatureMax;
+  const yAccessor = (d) => d.temperatureMax;
   const dateParser = d3.timeParse('%Y-%m-%d');
-  const xAccessor = d => dateParser(d.date);
+  const xAccessor = (d) => dateParser(d.date);
 
   // chart dimensions
   let dimensions = {
@@ -15,8 +15,8 @@ async function drawLineChart() {
       top: 15,
       right: 15,
       bottom: 40,
-      left: 60
-    }
+      left: 60,
+    },
   };
   dimensions.boundedWidth =
     dimensions.width - dimensions.margin.left - dimensions.margin.right;
@@ -62,8 +62,8 @@ async function drawLineChart() {
 
   const lineGenerator = d3
     .line()
-    .x(d => xScale(xAccessor(d)))
-    .y(d => yScale(yAccessor(d)));
+    .x((d) => xScale(xAccessor(d)))
+    .y((d) => yScale(yAccessor(d)));
 
   // draws line from data in dataset
   const line = bounds
