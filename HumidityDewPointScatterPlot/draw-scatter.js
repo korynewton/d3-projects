@@ -1,6 +1,6 @@
 async function drawScatter() {
   // load data
-  const dataset = await d3.json('./seattle_weather_data.json');
+  const dataset = await d3.json('../seattle_weather_data.json');
 
   // data accessors
   const xAccessor = (d) => d.dewPoint;

@@ -1,6 +1,6 @@
 async function drawLineChart() {
   // import weather data
-  const dataset = await d3.json('./seattle_weather_data.json');
+  const dataset = await d3.json('../seattle_weather_data.json');
   // const dataset = await d3.json('./kazakhstan_weather_data.json');
 
   const yAccessor = (d) => d.temperatureMax;

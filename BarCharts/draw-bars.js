@@ -10,7 +10,7 @@ Steps:
 */
 
 async function drawBars() {
-  const dataset = await d3.json('./seattle_weather_data.json');
+  const dataset = await d3.json('../seattle_weather_data.json');
 
   // Access Data
   const metricAccessor = (d) => d.humidity;
