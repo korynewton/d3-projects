@@ -10,9 +10,8 @@ Steps:
 */
 
 async function drawBars() {
-  const dataset = await d3.json('../seattle_weather_data.json');
-
   // Access Data
+  const dataset = await d3.json('/../seattle_weather_data.json');
   const metricAccessor = (d) => d.humidity;
   const yAccessor = (d) => d.length;
 
@@ -34,103 +33,124 @@ async function drawBars() {
   dimensions.boundedHeight =
     dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
 
-  // Draw Canvas
-  const wrapper = d3
-    .select('#wrapper')
-    .append('svg')
-    .attr('width', dimensions.width)
-    .attr('height', dimensions.height);
+  const drawHistogram = (metric) => {
+    const metricAccessor = (d) => d[metric];
+    const yAccessor = (d) => d.length;
 
-  const bounds = wrapper
-    .append('g')
-    .style(
-      'transform',
-      `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px`
-    );
+    // Draw Canvas
+    const wrapper = d3
+      .select('#wrapper')
+      .append('svg')
+      .attr('width', dimensions.width)
+      .attr('height', dimensions.height);
 
-  // Create Scales
-  // x scale
-  const xScale = d3
-    .scaleLinear()
-    .domain(d3.extent(dataset, metricAccessor))
-    .range([0, dimensions.boundedWidth])
-    .nice();
+    const bounds = wrapper
+      .append('g')
+      .style(
+        'transform',
+        `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px`
+      );
 
-  // create data bins for y axis
-  const binsGenerator = d3
-    .histogram()
-    .domain(xScale.domain())
-    .value(metricAccessor)
-    .thresholds(12);
+    // Create Scales
+    // x scale
+    const xScale = d3
+      .scaleLinear()
+      .domain(d3.extent(dataset, metricAccessor))
+      .range([0, dimensions.boundedWidth])
+      .nice();
 
-  const bins = binsGenerator(dataset);
+    // create data bins for y axis
+    const binsGenerator = d3
+      .histogram()
+      .domain(xScale.domain())
+      .value(metricAccessor)
+      .thresholds(12);
 
-  // y scale
-  const yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(bins, yAccessor)])
-    .range([dimensions.boundedHeight, 0])
-    .nice();
+    const bins = binsGenerator(dataset);
 
-  // Draw Data
-  const binsGroup = bounds.append('g');
+    // y scale
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(bins, yAccessor)])
+      .range([dimensions.boundedHeight, 0])
+      .nice();
 
-  const binGroups = binsGroup.selectAll('g').data(bins).enter().append('g');
-  const barPadding = 1;
+    // Draw Data
+    const binsGroup = bounds.append('g');
 
-  const barRects = binGroups
-    .append('rect')
-    .attr('x', (d) => xScale(d.x0) + barPadding / 2)
-    .attr('y', (d) => yScale(yAccessor(d)))
-    .attr('width', (d) => d3.max([0, xScale(d.x1) - xScale(d.x0) - barPadding]))
-    .attr('height', (d) => dimensions.boundedHeight - yScale(yAccessor(d)))
-    .attr('fill', 'cornflowerblue');
+    const binGroups = binsGroup.selectAll('g').data(bins).enter().append('g');
+    const barPadding = 1;
 
-  // Add Labels
-  const barText = binGroups
-    .filter(yAccessor)
-    .append('text')
-    .attr('x', (d) => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
-    .attr('y', (d) => yScale(yAccessor(d)) - 5)
-    .text(yAccessor)
-    .style('text-anchor', 'middle')
-    .attr('fill', 'darkgrey')
-    .style('font-size', '12px')
-    .style('font-family', 'sans-serif');
+    const barRects = binGroups
+      .append('rect')
+      .attr('x', (d) => xScale(d.x0) + barPadding / 2)
+      .attr('y', (d) => yScale(yAccessor(d)))
+      .attr('width', (d) =>
+        d3.max([0, xScale(d.x1) - xScale(d.x0) - barPadding])
+      )
+      .attr('height', (d) => dimensions.boundedHeight - yScale(yAccessor(d)))
+      .attr('fill', 'cornflowerblue');
 
-  // draw mean value line
-  const mean = d3.mean(dataset, metricAccessor);
-  const meanLine = bounds
-    .append('line')
-    .attr('x1', xScale(mean))
-    .attr('x2', xScale(mean))
-    .attr('y1', -15)
-    .attr('y2', dimensions.boundedHeight)
-    .attr('stroke', 'maroon')
-    .attr('stroke-dasharray', '2px 4px');
+    // Add Labels
+    const barText = binGroups
+      .filter(yAccessor)
+      .append('text')
+      .attr('x', (d) => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
+      .attr('y', (d) => yScale(yAccessor(d)) - 5)
+      .text(yAccessor)
+      .style('text-anchor', 'middle')
+      .attr('fill', 'darkgrey')
+      .style('font-size', '12px')
+      .style('font-family', 'sans-serif');
 
-  const meanLabel = bounds
-    .append('text')
-    .attr('x', xScale(mean))
-    .attr('y', -20)
-    .text('mean')
-    .attr('fill', 'maroon')
-    .style('font-size', '12px')
-    .style('text-anchor', 'middle');
+    // draw mean value line
+    const mean = d3.mean(dataset, metricAccessor);
+    const meanLine = bounds
+      .append('line')
+      .attr('x1', xScale(mean))
+      .attr('x2', xScale(mean))
+      .attr('y1', -15)
+      .attr('y2', dimensions.boundedHeight)
+      .attr('stroke', 'maroon')
+      .attr('stroke-dasharray', '2px 4px');
 
-  // x-axis label
-  const xAxisGenerator = d3.axisBottom().scale(xScale);
-  const xAxis = bounds
-    .append('g')
-    .call(xAxisGenerator)
-    .style('transform', `translateY(${dimensions.boundedHeight}px)`);
-  const xAxisLabel = xAxis
-    .append('text')
-    .attr('x', dimensions.boundedWidth / 2)
-    .attr('y', dimensions.margin.bottom - 10)
-    .attr('fill', 'black')
-    .style('font-size', '1.4em')
-    .text('Humidity');
+    const meanLabel = bounds
+      .append('text')
+      .attr('x', xScale(mean))
+      .attr('y', -20)
+      .text('mean')
+      .attr('fill', 'maroon')
+      .style('font-size', '12px')
+      .style('text-anchor', 'middle');
+
+    // x-axis label
+    const xAxisGenerator = d3.axisBottom().scale(xScale);
+    const xAxis = bounds
+      .append('g')
+      .call(xAxisGenerator)
+      .style('transform', `translateY(${dimensions.boundedHeight}px)`);
+    const xAxisLabel = xAxis
+      .append('text')
+      .attr('x', dimensions.boundedWidth / 2)
+      .attr('y', dimensions.margin.bottom - 10)
+      .attr('fill', 'black')
+      .style('font-size', '1.4em')
+      .text(metric)
+      .style('text-transform', 'capitalize');
+  };
+
+  const metrics = [
+    'windSpeed',
+    'moonPhase',
+    'dewPoint',
+    'humidity',
+    'uvIndex',
+    'windBearing',
+    'temperatureMin',
+    'temperatureMax',
+  ];
+
+  metrics.forEach(drawHistogram);
 }
 
 drawBars();
